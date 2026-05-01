@@ -13,7 +13,7 @@ COPY "pyproject.toml" "uv.lock" ".python-version" ./
 # Install dependencies from lock file (ensures reproducible builds)
 RUN uv sync --locked
 # copy the script to the container. 1st name is source file, 2nd is destination
-COPY pipeline.py pipeline.py
+COPY ingest_data.py .
 
 # Set entry point
-ENTRYPOINT ["uv", "run", "python", "pipeline.py"]
+ENTRYPOINT ["uv", "run", "python", "ingest_data.py"]
