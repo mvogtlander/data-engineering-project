@@ -1,0 +1,41 @@
+version: "3.8"
+
+services:
+  db:
+    image: postgres:17-alpine
+    container_name: local_pgdb
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: root
+      POSTGRES_DB: nyc_taxi_data
+    volumes:
+      - local_pgdata:/var/lib/postgresql/data
+    networks:
+      - taxi_network
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: pgadmin4_container
+    ports:
+      - "8880:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@taxi.com
+      PGADMIN_DEFAULT_PASSWORD: admin123
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin
+    networks:
+      - taxi_network
+    depends_on:
+      - db
+
+networks:
+  taxi_network:
+    driver: bridge
+    name: taxi_network  # Explicitly set the network name
+
+volumes:
+  local_pgdata:
+  pgadmin-data:
