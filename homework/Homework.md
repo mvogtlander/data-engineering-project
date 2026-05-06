@@ -89,3 +89,32 @@ Which of the following sequences, respectively, describes the workflow for:
 
 Answers:
 - teraform init, terraform plan -auto-apply, terraform rm
+
+# Module 2 Homework: Workflow & Orchestration
+
+### Quiz Questions
+
+Complete the quiz shown below. It's a set of 6 multiple-choice questions to test your understanding of workflow orchestration, Kestra, and ETL pipelines.
+
+1) Within the execution for `Yellow` Taxi data for the year `2020` and month `12`: what is the uncompressed file size (i.e. the output file `yellow_tripdata_2020-12.csv` of the `extract` task)?
+In the execution go to metrics -> upload_to_gcs -> 134,481,400
+- 134.5 MiB
+
+2) What is the rendered value of the variable `file` when the inputs `taxi` is set to `green`, `year` is set to `2020`, and `month` is set to `04` during execution?
+- `{{inputs.taxi}}_tripdata_{{inputs.year}}-{{inputs.month}}.csv` 
+- `green_tripdata_2020-04.csv`
+
+3) How many rows are there for the `Yellow` Taxi data for all CSV files in the year 2020?
+In the yellow_tripdata dataset go to details and find the 'Number of rows' under Storage info. 
+- 24,648,499
+
+4) How many rows are there for the `Green` Taxi data for all CSV files in the year 2020?
+In the green_tripdata dataset go to details and find the 'Number of rows' under Storage info.
+- 1,734,051
+
+5) How many rows are there for the `Yellow` Taxi data for the March 2021 CSV file?
+- 1,925,152
+
+6) How would you configure the timezone to New York in a Schedule trigger?
+In the yaml file check the documentation for triggers. Here you'll find what properties are available and one of them being timezone. The default here is set to Etc/UTC however we could set this to any second column in https://en.wikipedia.org/wiki/List_of_tz_database_time_zones#List according to the kestra 'Schedule' documentation .
+- Add a `timezone` property and set this to `America/New_York` in the `Schedule` trigger configuration  
