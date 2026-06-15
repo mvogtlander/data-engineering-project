@@ -147,30 +147,32 @@ This is because BigQuery checks the metadata of the parquet files in GCS and not
 
 Write a query to retrieve the PULocationID from the table (not the external table) in BigQuery. Now write a query to retrieve the PULocationID and DOLocationID on the same table.
 
+SELECT COUNT(*)
+FROM (SELECT PULocationID, DOLocationId 
+      FROM `de-zoomcamp-mv-499409.nytaxi.yellow_tripdata_materialized`
+      GROUP BY PULocationID, DOLocationID);
+
 Why are the estimated number of Bytes different?
-- BigQuery is a columnar database, and it only scans the specific columns requested in the query. Querying two columns (PULocationID, DOLocationID) requires 
-reading more data than querying one column (PULocationID), leading to a higher estimated number of bytes processed.
-- BigQuery duplicates data across multiple storage partitions, so selecting two columns instead of one requires scanning the table twice, 
-doubling the estimated bytes processed.
-- BigQuery automatically caches the first queried column, so adding a second column increases processing time but does not affect the estimated bytes scanned.
-- When selecting multiple columns, BigQuery performs an implicit join operation between them, increasing the estimated bytes processed
+- BigQuery is a columnar database, and it only scans the specific columns requested in the query. Querying two columns (PULocationID, DOLocationID) requires reading more data than querying one column (PULocationID), leading to a higher estimated number of bytes processed.
 
 ## Question 4. Counting zero fare trips
 
 How many records have a fare_amount of 0?
-- 128,210
-- 546,578
-- 20,188,016
+SELECT COUNT(*)
+FROM `de-zoomcamp-mv-499409.nytaxi.yellow_tripdata_materialized`
+WHERE fare_amount = 0;
 - 8,333
 
 ## Question 5. Partitioning and clustering
 
 What is the best strategy to make an optimized table in Big Query if your query will always filter based on tpep_dropoff_datetime and order the results by VendorID (Create a new table with this strategy)
 
+CREATE OR REPLACE TABLE `de-zoomcamp-mv-499409.nytaxi.yellow_tripdata_partitioned_clustered`
+PARTITION BY DATE(tpep_dropoff_datetime)
+CLUSTER BY VendorID
+AS (SELECT * FROM `de-zoomcamp-mv-499409.nytaxi.yellow_tripdata`)
+;
 - Partition by tpep_dropoff_datetime and Cluster on VendorID
-- Cluster on by tpep_dropoff_datetime and Cluster on VendorID
-- Cluster on tpep_dropoff_datetime Partition by VendorID
-- Partition by tpep_dropoff_datetime and Partition by VendorID
 
 
 ## Question 6. Partition benefits
@@ -181,81 +183,36 @@ Write a query to retrieve the distinct VendorIDs between tpep_dropoff_datetime
 
 Use the materialized table you created earlier in your from clause and note the estimated bytes. Now change the table in the from clause to the partitioned table you created for question 5 and note the estimated bytes processed. What are these values? 
 
-
 Choose the answer which most closely matches.
  
+ # Q6: Materialized
+SELECT DISTINCT (VendorID)
+FROM `de-zoomcamp-mv-499409.nytaxi.yellow_tripdata_materialized`
+WHERE tpep_dropoff_datetime >= '2024-03-01' AND tpep_dropoff_datetime <= '2024-03-15';
+# Q6: Partitioned and clustered
+SELECT DISTINCT (VendorID)
+FROM `de-zoomcamp-mv-499409.nytaxi.yellow_tripdata_partitioned_clustered`
+WHERE tpep_dropoff_datetime >= '2024-03-01' AND tpep_dropoff_datetime <= '2024-03-15';
 
-- 12.47 MB for non-partitioned table and 326.42 MB for the partitioned table
 - 310.24 MB for non-partitioned table and 26.84 MB for the partitioned table
-- 5.87 MB for non-partitioned table and 0 MB for the partitioned table
-- 310.31 MB for non-partitioned table and 285.64 MB for the partitioned table
 
 
 ## Question 7. External table storage
 
 Where is the data stored in the External Table you created?
 
-- Big Query
-- Container Registry
 - GCP Bucket
-- Big Table
 
 ## Question 8. Clustering best practices
 
 It is best practice in Big Query to always cluster your data:
-- True
 - False
 
 
 ## Question 9. Understanding table scans
 
 No Points: Write a `SELECT count(*)` query FROM the materialized table you created. How many bytes does it estimate will be read? Why?
-
-
-## Submitting the solutions
-
-Form for submitting: https://courses.datatalks.club/de-zoomcamp-2026/homework/hw3
-
-
-## Learning in Public
-
-We encourage everyone to share what they learned. This is called "learning in public".
-
-Read more about the benefits [here](https://alexeyondata.substack.com/p/benefits-of-learning-in-public-and).
-
-### Example post for LinkedIn
-
-```
-🚀 Week 3 of Data Engineering Zoomcamp by @DataTalksClub complete!
-
-Just finished Module 3 - Data Warehousing with BigQuery. Learned how to:
-
-✅ Create external tables from GCS bucket data
-✅ Build materialized tables in BigQuery
-✅ Partition and cluster tables for performance
-✅ Understand columnar storage and query optimization
-✅ Analyze NYC taxi data at scale
-
-Working with 20M+ records and learning how partitioning reduces query costs!
-
-Here's my homework solution: <LINK>
-
-Following along with this amazing free course - who else is learning data engineering?
-
-You can sign up here: https://github.com/DataTalksClub/data-engineering-zoomcamp/
-```
-
-### Example post for Twitter/X
-
-```
-📊 Module 3 of Data Engineering Zoomcamp done!
-
-- BigQuery & GCS
-- External vs materialized tables
-- Partitioning & clustering
-- Query optimization
-
-My solution: <LINK>
-
-Free course by @DataTalksClub: https://github.com/DataTalksClub/data-engineering-zoomcamp/
-```
+The estimated amount of bytes being processed when running the query: 
+SELECT COUNT(*)
+FROM `de-zoomcamp-mv-499409.nytaxi.yellow_tripdata_materialized`
+Is 0 bytes. This is happening because when the table was created there is metadata available on how many rows there are in the table. The SELECT COUNT(*) is a metadata operation on the table and therefor doesnt need to read in any data. When we for example add a where clause then this isn't a metadata operation and the query would require to read the table. 
