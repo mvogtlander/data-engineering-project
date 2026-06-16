@@ -1,0 +1,10 @@
+version: 2
+
+sources:
+  - name: raw_data
+    description: "Raw data source for NYC taxi rides"
+    database: "de-zoomcamp-mv-499409" #Dataset ID in GCP
+    schema: "nytaxi" #Dataset name in GCP
+    tables:
+      - name: "green_tripdata_partitioned_clustered"
+      - name: "yellow_tripdata_partitioned_clustered"
