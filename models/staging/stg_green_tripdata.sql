@@ -1,7 +1,7 @@
 select
     -- identifiers
     cast(vendorid as int) as vendor_id,
-    cast(ratecodeid as int) as rate_code_id,
+    cast(ratecodeid as int) as ratecodeid,
     cast(pulocationid as int) as pickup_location_id,
     cast(dolocationid as int) as dropoff_location_id,
 
