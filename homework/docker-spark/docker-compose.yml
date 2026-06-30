@@ -1,0 +1,47 @@
+services:
+  spark-master:
+    image: apache/spark:4.0.3-scala2.13-java17-python3-r-ubuntu
+    container_name: spark-master
+    ports:
+      - "7077:7077"
+      - "8080:8080"
+    entrypoint: /opt/spark/bin/spark-class
+    command: org.apache.spark.deploy.master.Master --host 0.0.0.0 --port 7077 --webui-port 8080
+    environment:
+      - SPARK_NO_DAEMONIZE=true
+      - SPARK_MASTER_HOST=spark-master
+    networks:
+      - spark-net
+
+  spark-worker:
+    image: apache/spark:4.0.3-scala2.13-java17-python3-r-ubuntu
+    container_name: spark-worker
+    depends_on:
+      - spark-master
+    ports:
+      - "8081:8081"
+    entrypoint: /opt/spark/bin/spark-class
+    command: org.apache.spark.deploy.worker.Worker spark://spark-master:7077 --webui-port 8081 --host spark-worker
+    environment:
+      - SPARK_NO_DAEMONIZE=true
+    networks:
+      - spark-net
+
+  jupyter:
+    build: .
+    container_name: jupyter
+    depends_on:
+      - spark-master
+      - spark-worker
+    ports:
+      - "8888:8888"
+    volumes:
+      - .:/app
+    environment:
+      - SPARK_LOCAL_IP=0.0.0.0
+    networks:
+      - spark-net
+
+networks:
+  spark-net:
+    driver: bridge
